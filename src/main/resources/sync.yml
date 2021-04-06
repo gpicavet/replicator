@@ -1,0 +1,15 @@
+---
+question:
+  document-id: doc_id
+  document-type: questions
+  sql: >
+    SELECT concat(que_id,'.',ans_id) as doc_id, * FROM question
+    LEFT JOIN answer ON ans_questionId=que_id
+    WHERE que_id IN (:IDS)
+answer:
+  document-id: doc_id
+  document-type: questions
+  sql: >
+    SELECT concat(que_id,'.',ans_id) as doc_id,* FROM question
+    LEFT JOIN answer ON ans_questionId=que_id
+    WHERE ans_id IN (:IDS)
