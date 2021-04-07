@@ -50,7 +50,7 @@ public class SqlProcessor implements Processor {
              PreparedStatement stat = conn.prepareStatement(sql);) {
 
             for (int i = 0; i < events.size(); i++) {
-                stat.setObject(i+1, events.get(i).getPk());
+                stat.setObject(i + 1, events.get(i).getPk());
             }
 
             ResultSet rs = stat.executeQuery();
@@ -62,7 +62,7 @@ public class SqlProcessor implements Processor {
                 doc.setIdField(idField);
 
                 for (int i = 0; i < rsmd.getColumnCount(); i++) {
-                    doc.getFields().put(rsmd.getColumnName(i+1), rs.getObject(i+1));
+                    doc.getFields().put(rsmd.getColumnName(i + 1), rs.getObject(i + 1));
                 }
 
                 docs.add(doc);

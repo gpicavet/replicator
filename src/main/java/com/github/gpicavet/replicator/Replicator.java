@@ -45,7 +45,7 @@ public class Replicator implements Runnable {
 
     private Connection conn;
     private PGReplicationStream stream;
-    private boolean stop=false;
+    private boolean stop = false;
 
     public Replicator(String configFile, DataSource replicationDatasource, Processor processor, Writer writer) throws Exception {
 
@@ -68,7 +68,7 @@ public class Replicator implements Runnable {
 
     @SneakyThrows
     @Override
-    public void run(){
+    public void run() {
         Pattern p = Pattern.compile("table (\\S+)\\.(\\S+): (\\S+): \\S+:(\\S+) .*");
 
         while (!stop) {
@@ -141,7 +141,7 @@ public class Replicator implements Runnable {
 
     public void stop() {
         try {
-            stop=true;
+            stop = true;
             for (EventConsumer w : workerByTable.values())
                 w.setStop(true);
             for (Thread t : threadPool)
@@ -155,36 +155,36 @@ public class Replicator implements Runnable {
 
     public static void main(String[] args) throws Exception {
         PGSimpleDataSource dataSource = new PGSimpleDataSource();
-        dataSource.setProperty(PGProperty.PG_HOST,getenv("POSTGRES_HOST","localhost"));
-        dataSource.setProperty(PGProperty.PG_PORT,getenv("POSTGRES_PORT","5432"));
+        dataSource.setProperty(PGProperty.PG_HOST, getenv("POSTGRES_HOST", "localhost"));
+        dataSource.setProperty(PGProperty.PG_PORT, getenv("POSTGRES_PORT", "5432"));
         dataSource.setProperty(PGProperty.ASSUME_MIN_SERVER_VERSION, "9.4");
         dataSource.setProperty(PGProperty.REPLICATION, "database");
         dataSource.setProperty(PGProperty.PREFER_QUERY_MODE, "simple");
-        dataSource.setUser(getenv("POSTGRES_USER","postgres"));
+        dataSource.setUser(getenv("POSTGRES_USER", "postgres"));
         dataSource.setPassword(getenv("POSTGRES_PASS", "postgres"));
 
         RestClient restClient = RestClient.builder(
-                new HttpHost(getenv("ELASTIC_HOST","localhost"),
-                        Integer.parseInt(getenv("ELASTIC_PORT","9200")),
-                        getenv("ELASTIC_SCHEME","http"))).build();
+                new HttpHost(getenv("ELASTIC_HOST", "localhost"),
+                        Integer.parseInt(getenv("ELASTIC_PORT", "9200")),
+                        getenv("ELASTIC_SCHEME", "http"))).build();
 
-            Replicator repl = new Replicator(
-                    "sync.yml",
-                    dataSource,
-                    new SqlProcessor(dataSource, "sync.yml"),
-                    new EsWriter(restClient));
+        Replicator repl = new Replicator(
+                "sync.yml",
+                dataSource,
+                new SqlProcessor(dataSource, "sync.yml"),
+                new EsWriter(restClient));
 
-            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-                repl.stop();
-            }));
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            repl.stop();
+        }));
 
-            repl.start();
+        repl.start();
 
     }
 
     static String getenv(String name, String defaultValue) {
         String value = System.getenv(name);
-        if(value == null) {
+        if (value == null) {
             value = defaultValue;
         }
         return value;

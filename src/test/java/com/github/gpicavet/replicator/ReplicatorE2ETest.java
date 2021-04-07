@@ -34,7 +34,7 @@ class ReplicatorE2ETest {
 //            .withLogConsumer(new Slf4jLogConsumer(LOGGER))
             .withUsername("postgres")
             .withPassword("postgres")
-            .withClasspathResourceMapping("db/1-init.sql","/docker-entrypoint-initdb.d/1-init.sql", BindMode.READ_ONLY)
+            .withClasspathResourceMapping("db/1-init.sql", "/docker-entrypoint-initdb.d/1-init.sql", BindMode.READ_ONLY)
             .withCommand("postgres -c max_wal_senders=4 " +
                     "-c wal_keep_size=4 " +
                     "-c wal_level=logical " +
@@ -43,8 +43,7 @@ class ReplicatorE2ETest {
     static ElasticsearchContainer elastic = new ElasticsearchContainer("docker.elastic.co/elasticsearch/elasticsearch:7.12.0")
             .withExposedPorts(9200)
 //            .withLogConsumer(new Slf4jLogConsumer(LOGGER))
-            .withEnv("discovery.type","single-node");
-
+            .withEnv("discovery.type", "single-node");
 
 
     @Test
@@ -61,7 +60,7 @@ class ReplicatorE2ETest {
                 new HttpHost("localhost", elastic.getMappedPort(9200), "http")).build();
 
         //init data
-        try(Connection sqlConnection = dataSource.getConnection();) {
+        try (Connection sqlConnection = dataSource.getConnection();) {
             Statement st = sqlConnection.createStatement();
             for (int i = 0; i < 10; i++) {
                 st.execute("insert into question values(" + i + ",'title','body','author',NOW())");
@@ -76,7 +75,7 @@ class ReplicatorE2ETest {
         replicator.start();
 
         //make some updates
-        try(Connection sqlConnection = dataSource.getConnection();) {
+        try (Connection sqlConnection = dataSource.getConnection();) {
             Statement st = sqlConnection.createStatement();
             st.execute("update question set que_creationDate=NOW()");
         }
@@ -87,13 +86,13 @@ class ReplicatorE2ETest {
                 Response resp = restClient.performRequest(new Request("GET", "/questions/_count"));
                 int count = JsonIterator.deserialize(IOUtils.toByteArray(resp.getEntity().getContent())).get("count").toInt();
                 return count == 100;
-            } catch(ResponseException e) {
-                if(e.getResponse().getStatusLine().getStatusCode() != 404) {
+            } catch (ResponseException e) {
+                if (e.getResponse().getStatusLine().getStatusCode() != 404) {
                     throw new RuntimeException(e);
                 }
                 return false;
-            } catch(IOException e) {
-               throw new RuntimeException(e);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
             }
         }, 10000);
 
@@ -101,9 +100,9 @@ class ReplicatorE2ETest {
     }
 
     void assertWait(Supplier<Boolean> f, long timeout) throws InterruptedException {
-        for(int i=0; i<timeout/1000; i++) {
+        for (int i = 0; i < timeout / 1000; i++) {
             Thread.sleep(1000);
-            if(f.get()) {
+            if (f.get()) {
                 return;
             }
         }
